@@ -153,6 +153,107 @@ strategy:
 - Input validation
 - Error handling
 
+## Performance Analysis
+
+### Script Usage
+```bash
+# Basic usage with default settings
+node scripts/analyze-performance.js
+
+# Custom configuration
+node scripts/analyze-performance.js --threshold 2000 --directory test-results --output performance-results
+```
+
+### Command Line Options
+- `--threshold <ms>`: Performance threshold in milliseconds (default: 2000)
+- `--directory <path>`: Test results directory (default: test-results)
+- `--output <path>`: Output directory (default: performance-results)
+
+### Output Files
+
+#### 1. Summary JSON (`summary.json`)
+```json
+{
+  "timestamp": "2025-01-13T14:03:47+01:00",
+  "totalTests": 100,
+  "passedThreshold": 95,
+  "failedThreshold": 5,
+  "slowestEndpoints": [
+    {
+      "endpoint": "SearchCorporateActions",
+      "time": 2500,
+      "test": "T1_SearchCorporateActions_LargeDataset_ReturnsFilteredList"
+    }
+  ],
+  "endpointStats": {
+    "SearchCorporateActions": {
+      "count": 50,
+      "averageTime": 1200,
+      "fastest": 500,
+      "slowest": 2500
+    }
+  }
+}
+```
+
+#### 2. Detailed Report (`detailed-report.md`)
+- Overall test statistics
+- List of slowest endpoints
+- Per-endpoint performance metrics
+- Historical trends
+- Threshold violations
+
+### Integration with CI/CD
+
+The script is automatically run as part of the performance workflow:
+```yaml
+- name: Analyze Performance Results
+  run: |
+    node scripts/analyze-performance.js --threshold ${{ env.PERFORMANCE_THRESHOLD_MS }}
+```
+
+### Performance Metrics
+
+1. **Response Times**
+   - Average response time per endpoint
+   - Fastest and slowest responses
+   - Response time distribution
+
+2. **Threshold Analysis**
+   - Number of tests exceeding threshold
+   - Percentage of passing tests
+   - Trend analysis over time
+
+3. **Endpoint Statistics**
+   - Per-endpoint performance metrics
+   - Identification of problematic endpoints
+   - Historical performance data
+
+4. **Reporting**
+   - Automated report generation
+   - Performance trends visualization
+   - Threshold violation alerts
+
+### Best Practices
+
+1. **Setting Thresholds**
+   - Base thresholds on historical data
+   - Consider endpoint complexity
+   - Account for network latency
+   - Set different thresholds for different endpoints
+
+2. **Monitoring**
+   - Regular performance test execution
+   - Trend analysis over time
+   - Alert on significant changes
+   - Track seasonal patterns
+
+3. **Optimization**
+   - Focus on slowest endpoints
+   - Investigate threshold violations
+   - Monitor resource usage
+   - Track performance regressions
+
 ## Environment Setup
 
 ### Local Development
