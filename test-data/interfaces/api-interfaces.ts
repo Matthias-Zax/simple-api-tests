@@ -6,6 +6,9 @@ export type ActiveStatus = 'ACTIVE' | 'INACTIVE';
 export type ZspaWfStatus = 'OPEN' | 'CLOSED' | 'CANCELLED';
 export type AgentDisclosureStatus = 'OPEN' | 'CLOSED';
 export type SpaCanStatus = 'PRE' | 'ADV' | 'REM';
+export type CanTypeId = 'DVCA' | 'TEND' | 'BIDS' | 'INTR' | 'REDM' | 'EXRI';
+export type SpaCanstat = 'ACTIVE' | 'INACTIVE' | 'PENDING';
+export type SpaStatus = 'NEW' | 'PROCESSED' | 'RELEASED' | 'WITHDRAWN';
 
 // GIG API Request Parameters
 export interface GIGParamsInBody {
@@ -41,6 +44,18 @@ export interface SearchCanInstanceResultWithPos {
     firstReleaseDate?: string; // format: date-time
     rddt?: string;
     zspaInstructableViaGIG?: YesNoStatus;
+}
+
+// Search Types
+export interface SearchParams {
+    isin?: string;
+    canTypeId?: CanTypeId;
+    spaCanstat?: SpaCanstat;
+    spaStatus?: SpaStatus;
+    page?: number;
+    pageSize?: number;
+    sort?: string;
+    order?: 'asc' | 'desc';
 }
 
 // Corporate Action Details Types
@@ -93,4 +108,45 @@ export interface SearchResponse<T> {
     totalPages?: number;
     size?: number;
     number?: number;
+}
+
+// History Types
+export interface HistoryEntry {
+    zspaId: string;
+    spaId: number;
+    actionType: string;
+    timestamp: string;  // format: date-time
+    userId?: string;
+    details?: string;
+    status?: string;
+    actionResult?: string;
+    systemInfo?: {
+        version?: string;
+        environment?: string;
+    };
+}
+
+export interface HistoryResponse {
+    entries: HistoryEntry[];
+    totalCount: number;
+}
+
+// Management Types
+export interface WithdrawRequest {
+    zspaId: string;
+    reason: string;
+    comment?: string;
+    metadata?: {
+        requestId?: string;
+        source?: string;
+    };
+}
+
+export interface WithdrawResponse {
+    success: boolean;
+    zspaId: string;
+    timestamp: string;  // format: date-time
+    message?: string;
+    status?: string;
+    requestId?: string;
 }
