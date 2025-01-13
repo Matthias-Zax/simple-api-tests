@@ -1,0 +1,79 @@
+name: Performance Tests
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # Run weekly on Mondays
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  NODE_VERSION: '18.x'
+  TEST_ENV: 'test'
+  PERFORMANCE_THRESHOLD_MS: 2000  # 2 seconds threshold
+
+jobs:
+  performance:
+    name: Run Performance Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright
+      run: npx playwright install --with-deps
+
+    - name: Run Performance Tests
+      env:
+        API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        API_USERNAME: ${{ secrets.API_USERNAME }}
+        API_PASSWORD: ${{ secrets.API_PASSWORD }}
+        API_TOKEN: ${{ secrets.API_TOKEN }}
+      run: |
+        npm test -- --grep "@performance"
+
+    - name: Analyze Performance Results
+      run: |
+        node scripts/analyze-performance.js --threshold ${{ env.PERFORMANCE_THRESHOLD_MS }}
+
+    - name: Upload Performance Results
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-results
+        path: performance-results/
+        retention-days: 90
+
+    - name: Create Performance Report
+      if: always()
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const perfResults = JSON.parse(fs.readFileSync('performance-results/summary.json', 'utf8'));
+          
+          const body = `## Performance Test Results
+          
+          ### Summary
+          - Total Tests: ${perfResults.totalTests}
+          - Passed Threshold: ${perfResults.passedThreshold}
+          - Failed Threshold: ${perfResults.failedThreshold}
+          
+          ### Slowest Endpoints
+          ${perfResults.slowestEndpoints.map(e => `- ${e.endpoint}: ${e.time}ms`).join('\n')}
+          
+          [View detailed results](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`;
+          
+          await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: `Performance Test Results - ${new Date().toISOString().split('T')[0]}`,
+            body: body,
+            labels: ['performance']
+          });

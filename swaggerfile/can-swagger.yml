@@ -1,0 +1,2999 @@
+openapi: "3.0.2"
+info:
+  title: Corporate Action API
+  version: "1.0.2"
+servers:
+  - url: https://rzbtomt01.at.rzb.rbg.cc/cantest/
+paths:
+  /corporateActions/canspa:
+    get:
+      tags:
+        - Corporate Action
+      summary: Finds Corporate Actions by criteria
+      description: Search by corporate action criteria
+      operationId: findCanspa
+      parameters:
+        - $ref: './shared-resources/common-isins.yaml#/components/parameters/isinInQueryWithMaxLength'
+        - $ref: '#/components/parameters/spaCanstat'
+        - $ref: '#/components/parameters/spaStatus'
+        - $ref: './shared-resources/common.yaml#/components/parameters/sort'
+        - $ref: './shared-resources/common.yaml#/components/parameters/order'
+        - $ref: './shared-resources/common.yaml#/components/parameters/page'
+        - $ref: './shared-resources/common.yaml#/components/parameters/pageSize'
+        - name: canTypeId
+          in: query
+          example: 36
+          description: Can event typ id (svzcantyp)
+          schema:
+            type: integer
+            format: int64
+        - name: zspaIds
+          in: query
+          example: AT00007430163806, UK00007430164432
+          description: List of Corporate action identifications
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CanspaPage'
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+            - 'CAN-CA_E'
+  /corporateActions/search:
+    get:
+      tags:
+        - Corporate Action
+      summary: Finds Corporate Actions by criteria
+      description: Search by corporate action criteria
+      operationId: findByCaCriteria
+      parameters:
+        - $ref: './shared-resources/common-isins.yaml#/components/parameters/isinInQueryWithMaxLength'
+        - $ref: './shared-resources/common.yaml#/components/parameters/corpRef'
+        - $ref: '#/components/parameters/zspaStatus'
+        - $ref: '#/components/parameters/zspaWfStatus'
+        - $ref: '#/components/parameters/spaCanstat'
+        - $ref: '#/components/parameters/spaStatus'
+        - $ref: '#/components/parameters/caFromDate'
+        - $ref: '#/components/parameters/caToDate'
+        - $ref: '#/components/parameters/canSpaAttrs'
+        - $ref: './shared-resources/common.yaml#/components/parameters/sort'
+        - $ref: './shared-resources/common.yaml#/components/parameters/order'
+        - $ref: './shared-resources/common.yaml#/components/parameters/page'
+        - $ref: './shared-resources/common.yaml#/components/parameters/pageSize'
+        - $ref: './shared-resources/common.yaml#/components/parameters/cantypCaevIds'
+        - name: coaf
+          in: query
+          example: YY17121YY
+          description: Coaf
+          schema:
+            type: string
+        - name: dateselection
+          in: query
+          example: 2017-07-21
+          description: Can event spa date - creation date of the event
+          schema:
+            type: string
+            enum:
+              - spa_date
+              - rddt_date
+              - RDDT
+            x-enum-varnames:
+              - spa_date
+              - rddt_date
+              - RDDT
+        - name: rddtFromDate
+          in: query
+          example: 2017-07-21
+          description: RDDT date
+          schema:
+            type: string
+            format: date
+        - name: rddtToDate
+          in: query
+          example: 2017-07-21
+          description: Record date
+          schema:
+            type: string
+            format: date
+        - name: recordDateFromDate
+          in: query
+          example: 2017-07-21
+          description: Record date
+          schema:
+            type: string
+            format: date
+        - name: recordDateToDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: advToDate
+          in: query
+          example: 2017-07-21
+          description: Advice date
+          schema:
+            type: string
+            format: date
+        - name: advFromDate
+          in: query
+          example: 2017-07-21
+          description: Advice date
+          schema:
+            type: string
+            format: date
+        - name: areAgentDisclosures
+          in: query
+          example: true
+          description: Flag to load agent disclosures by non swift attribute email != null
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/nsdResponseStatus'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorporateActionResultPage'
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/search-with-pos:
+    post:
+      tags:
+        - GIG API Corporate Actions with positions
+      summary: Finds Corporate Actions by criteria with additional data for GIG
+      description: Search by corporate action criteria
+      operationId: findByCaCriteriaWithPos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GIGParamsInBody'
+      responses:
+        '200':
+          description: successful operation - list of caevs with positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchCanInstanceResultWithPos'
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+            - 'GIG_API'
+  /corporateActionsHolidays/holidays:
+    get:
+      tags:
+        - canHoliday
+      operationId: getHolidays
+      description: Fetch Holidays for non processing days
+      parameters:
+        - $ref: './shared-resources/common.yaml#/components/parameters/sort'
+        - $ref: './shared-resources/common.yaml#/components/parameters/order'
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: name
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'A collection of Holidays'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Holiday'
+      security:
+        - can_auth:
+            - 'CAN-WAC_V'
+    put:
+      tags:
+        - canHoliday
+      description: Update Holiday
+      operationId: updateHoliday
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Holiday'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Holiday'
+      security:
+        - can_auth:
+            - 'CAN-WAC_E'
+    post:
+      tags:
+        - canHoliday
+      description: Create Holiday
+      operationId: createHoliday
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Holiday'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Holiday'
+      security:
+        - can_auth:
+            - 'CAN-WAC_E'
+    delete:
+      tags:
+        - canHoliday
+      operationId: deleteHoliday
+      description: Delete Holiday from db
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 'Successfully deleted'
+      security:
+        - can_auth:
+          - 'CAN-WAC_E'
+  /corporateActions/corporate-action-details:
+    get:
+      tags:
+        - GIG API Corporate Actions details
+      summary: Find Corporate Action details for GIG
+      description: Get Corporate Action Details by PosId
+      operationId: getCorporateActionDetailsForGIG
+      parameters:
+        - name: posId
+          in: query
+          description: Position Id
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: src
+          in: query
+          description: pos/wpos
+          required: true
+          schema:
+            type: string
+        - name: language
+          in: query
+          required: true
+          description: Language for the details
+          example: EN
+          schema:
+            $ref: './shared-resources/common.yaml#/components/schemas/LanguageType'
+      responses:
+        '200':
+          description: successful operation - details for a corporate action
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CorporateActionDetailsForGIG'
+        '400':
+          description: Invalid parameters
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+            - 'GIG_API'
+  /corporateActions/searchNsdTaxDisclosure:
+    get:
+      tags:
+        - Nsd Disclosure
+      summary: Finds Corporate Actions by criteria
+      description: Search by corporate action criteria
+      operationId: findTaxDisclosureByCriteria
+      parameters:
+        - $ref: './shared-resources/common-isins.yaml#/components/parameters/isinInQueryWithMaxLength'
+        - $ref: '#/components/parameters/zspaStatus'
+        - $ref: '#/components/parameters/spaCanstat'
+        - $ref: '#/components/parameters/spaStatus'
+        - $ref: '#/components/parameters/caFromDate'
+        - $ref: '#/components/parameters/caToDate'
+        - $ref: '#/components/parameters/canSpaAttrs'
+        - $ref: './shared-resources/common.yaml#/components/parameters/sort'
+        - $ref: './shared-resources/common.yaml#/components/parameters/order'
+        - $ref: './shared-resources/common.yaml#/components/parameters/page'
+        - $ref: './shared-resources/common.yaml#/components/parameters/pageSize'
+        - name: dateselection
+          in: query
+          example: 2017-07-21
+          description: Can event spa date - creation date of the event
+          schema:
+            type: string
+            enum:
+              - spa_date
+              - rddt_date
+              - RDTE
+            x-enum-varnames:
+              - spa_date
+              - rddt_date
+              - RDDT
+        - name: rdteFromDate
+          in: query
+          example: 2017-07-21
+          description: RDTE date
+          schema:
+            type: string
+            format: date
+        - name: rdteToDate
+          in: query
+          example: 2017-07-21
+          description: RDTE date
+          schema:
+            type: string
+            format: date
+        - name: advToDate
+          in: query
+          example: 2017-07-21
+          description: Advice date
+          schema:
+            type: string
+            format: date
+        - name: advFromDate
+          in: query
+          example: 2017-07-21
+          description: Advice date
+          schema:
+            type: string
+            format: date
+        - name: nsdDisclosureEventStatus
+          in: query
+          example: 2017-07-21
+          description: >-
+            CLOSED - if all lagerstellen defined in the can event have processed disclosure with status CLOSED
+            OPEN - if there exists at least one lagerstelle linked to the can event which has unprocessed disclosure
+          schema:
+            type: string
+            enum:
+              - OPEN
+              - CLOSED
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorporateActionResultTaxPage'
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/checkIsinInGdp/{isin}:
+    get:
+      tags:
+        - GDP
+      summary: Validate isin with GDP
+      description: Search by corporate action criteria
+      operationId: checkIsinInGdp
+      parameters:
+        - $ref: './shared-resources/common-isins.yaml#/components/parameters/isinInPathRequiredWithPattern'
+      responses:
+        '200':
+          description: returns fivfi id of the isin, is was found in the GDP
+          content:
+            text/plain:
+              schema:
+                type: string
+        '204':
+          description: isin not found in the database no string will be returned
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid isin
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/checkIsinsInGdp/{isins}:
+    get:
+      tags:
+        - GDP
+      summary: Validate isins list with GDP
+      description: Validate a list of isins
+      operationId: checkIsinsInGdp
+      parameters:
+        - $ref: './shared-resources/common-isins.yaml#/components/parameters/isinsInPathRequiredWithPattern'
+      responses:
+        '200':
+          description: returns  list of fivfi ids of the isin, if were found in the GDP
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          description: Invalid isins
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/isinSanctions/{isin}:
+    get:
+      tags:
+        - GDP
+      summary: Get ISIN sanctions
+      description: Returns sanctions defined in GDP for specified ISIN - returns only sanctions currently in place.
+      operationId: getIsinSanctions
+      parameters:
+        - $ref: './shared-resources/common-isins.yaml#/components/parameters/isinInPathRequiredWithPattern'
+      responses:
+        '200':
+          description: Returns active sanctions for given ISIN
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IsinSanction'
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/isin/{spaId}:
+    get:
+      tags:
+        - Corporate Action
+      summary: Get CA ISIN
+      description: Returns ISIN of Corporate Action specified by given spa ID
+      operationId: getIsin
+      parameters:
+        - name: spaId
+          in: path
+          required: true
+          example: 1234
+          description: ID of Corporate Action
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Returns ISIN of CA
+          content:
+            text/plain:
+              schema:
+                type: string
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/getActualZspa/{spaId}:
+    get:
+      tags:
+        - Corporate Action
+      description: Get the information about corporate actions
+      operationId: getActualZspa
+      parameters:
+        - name: spaId
+          in: path
+          required: true
+          example: 12345
+          description: Corporate action identification
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: return the last active zspa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Canzspa'
+        '204':
+          description: isin not found in the database no string will be returned
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid isin
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/getSpaZspaPairs:
+    get:
+      tags:
+        - Corporate Action
+      description: Get current zspaId paired to spaId from given spaId list
+      operationId: getSpaZspaPairs
+      parameters:
+        - name: spaIds
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+      responses:
+        '200':
+          description: return the last active zspa
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SpaZspaPair'
+        '204':
+          description: isin not found in the database no string will be returned
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid isin
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/orderHead/{spaId}:
+    get:
+      tags:
+        - Corporate Action Data
+      description: Get the information about corporate actions for customer instructions
+      operationId: orderHead
+      parameters:
+        - name: spaId
+          in: path
+          required: true
+          example: 12345
+          description: Corporate action identification
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: returns fivfi id of the isin, is was found in the GDP
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderHead'
+        '204':
+          description: isin not found in the database no string will be returned
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid isin
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/history/{spaId}:
+    get:
+      tags:
+        - Corporate Action
+      summary: Returns corporate actions history (canzspa_log)
+      description: Returns corporate actions history (canzspa_log)
+      operationId: getEventHistory
+      parameters:
+        - name: spaId
+          in: path
+          required: true
+          example: 1111
+          description: Can event id
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorporateActionHistory'
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/geos-reconciliation-status:
+    get:
+      tags:
+        - Corporate Action
+      description: GEOS event reconciliation status
+      operationId: getGeosEventReconciliationStatuses
+      parameters:
+        - $ref: './shared-resources/common-zspaIds.yaml#/components/parameters/zspaIdInQueryRequired'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CorporateActionGEOSReconciliationStatus'
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+          - 'CAN-CA_V'
+  /corporateActions/getById/{zspaId}:
+    get:
+      tags:
+        - Corporate Action
+      summary: Gets corporate action by zspaId
+      description: Returns existing corporate actions by zspa id or 404
+      operationId: getById
+      parameters:
+        - $ref: './shared-resources/common-zspaIds.yaml#/components/parameters/zspaIdInPathRequired'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchCanInstanceResult'
+        '404':
+          description: Not found
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/lagetstellen/{spaId}:
+    get:
+      tags:
+        - Corporate Action
+      summary: Gets list of laggestellen selected in corporate action by spaId
+      description: Returns list of laggestellen by spa id or 404
+      operationId: getLagetstellenBySpaId
+      parameters:
+        - name: spaId
+          in: path
+          required: true
+          example: 1111
+          description: Can event id
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LagerstelleType'
+        '404':
+          description: Not found
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActionsData/options/{spaId}:
+    get:
+      tags:
+        - Corporate Action Data
+      description: Gets the default option code from a ca schema
+      operationId: options
+      parameters:
+        - name: spaId
+          in: path
+          required: true
+          example: 12345
+          description: Corporate action identification
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: return available options from the schema for the event
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Option'
+        '400':
+          description: Invalid event
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+            - 'GIG_API'
+  /corporateActionsData/defaultOption/{spaId}:
+    get:
+      tags:
+        - Corporate Action Data
+      description: Gets the default option code from a ca schema
+      operationId: defaultOption
+      parameters:
+        - name: spaId
+          in: path
+          required: true
+          example: 12345
+          description: Corporate action identification
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: return default option from the schema for the event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OptionId'
+        '400':
+          description: Invalid event
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+            - 'GIG_API'
+  /corporateActionsData/corpRef/{zspaId}:
+    get:
+      tags:
+        - Corporate Action Data
+      description: >-
+        Get corporate action corp ref
+      operationId: corpRef
+      parameters:
+        - $ref: './shared-resources/common-zspaIds.yaml#/components/parameters/zspaIdInPathRequired'
+      responses:
+        '200':
+          description: return zspa's corp ref
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid event
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActionsData/dueDate/{zspaId}:
+    get:
+      tags:
+        - Corporate Action Data
+      description: >-
+        Get corporate action due date from event data.
+        Block (OSCA),
+        Tags (98a, 98C)
+        Value source - (XDTE, EFFD , RDTE) or TODAY
+        The value is take by priority from sq XDTE, EFFD, RDTE if non of those are set TODAY is taken
+      operationId: dueDate
+      parameters:
+        - $ref: './shared-resources/common-zspaIds.yaml#/components/parameters/zspaIdInPathRequired'
+      responses:
+        '200':
+          description: return default option from the schema for the event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DueDate'
+        '400':
+          description: Invalid event
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActionsData/canspaAttrValue:
+    get:
+      tags:
+        - Corporate Action Data
+      description: Corporate action non swift attributes assigned to zspa
+      operationId: getCanspaAttrvalueMap
+      parameters:
+        - name: spaId
+          in: query
+          example: W
+          description: W(Writting) F(Generated not printed) E(Error) P(Printed) R(Done) N(No report) I(Ignored due to duplicities)
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                additionalProperties:
+                  type: string
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActionsData/canspaAttrValues:
+    get:
+      tags:
+        - Corporate Action Data
+      description: Corporate action non swift attributes by corpRef
+      operationId: getCanspaAttrValueMapByCorpRef
+      parameters:
+        - $ref: './shared-resources/common.yaml#/components/parameters/corpRef'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+                additionalProperties:
+                  type: string
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActionsData/details:
+    get:
+      tags:
+        - Corporate Action Data
+      summary: Get corporate action details
+      description: Get corporate action details by CA ID (spaId)
+      operationId: getCorporateActionDetails
+      parameters:
+        - name: spaId
+          in: query
+          required: true
+          example: 1111
+          description: Can spa event id
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorporateActionDetails'
+        '404':
+          description: Not found
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+    put:
+      tags:
+        - Corporate Action Data
+      summary: Update corporate action
+      description: Update corporate action details
+      operationId: updateCorporateActionDetails
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CorporateActionDetails'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorporateActionDetails'
+      security:
+        - can_auth:
+            - 'CAN-CA_E' # TOCheck
+    post:
+      tags:
+        - Corporate Action Data
+      summary: Create corporate action
+      description: Create corporate action
+      operationId: createCorporateActionDetails
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CorporateActionDetails'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorporateActionDetails'
+      security:
+        - can_auth:
+            - 'CAN-CA_E' # TOCheck
+  /corporateActionsData/canvlus:
+    get:
+      tags:
+        - Corporate Action Data
+      summary: Get canvlus for the corporate action
+      description: Get corporate action details by zspaId
+      operationId: getCanvlus
+      parameters:
+        - $ref: './shared-resources/common-zspaIds.yaml#/components/parameters/zspaIdInQueryRequired'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Canvlu'
+        '404':
+          description: Not found
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActionsData/detailsnew:
+    get:
+      tags:
+        - Corporate Action Data
+      summary: Get new corporate action details
+      description: Get corporate action details for new CA
+      operationId: getNewCorporateActionDetails
+      parameters:
+        - name: canTypeId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: './shared-resources/common-isins.yaml#/components/parameters/isinInQueryRequired'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorporateActionDetails'
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActionsData/attrDefinitions:
+    get:
+      tags:
+        - Corporate Action Data
+      summary: Get corporate action attributes definitions
+      description: Get corporate action attributes definitions
+      operationId: getCorporateActionAttrsDefinitions
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CanspaAttrDefinition'
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActionsData/comments:
+    get:
+      tags:
+        - Corporate Action Data
+      summary: Add corporate action comment
+      description: Add corporate action comment
+      operationId: getCorporateActionComments
+      parameters:
+        - name: spaId
+          in: query
+          required: true
+          description: Can spa event id
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './shared-resources/common.yaml#/components/schemas/Comment'
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+    post:
+      tags:
+        - Corporate Action Data
+      summary: Add corporate action comment
+      description: Add corporate action comment
+      operationId: addCorporateActionComment
+      parameters:
+        - name: spaId
+          in: query
+          required: true
+          description: Can spa event id
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './shared-resources/common.yaml#/components/schemas/Comment'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './shared-resources/common.yaml#/components/schemas/Comment'
+      security:
+        - can_auth:
+            - 'CAN-CA_E'    #ToCheck
+  /corporateActionsData/updateHeaderData:
+    put:
+      tags:
+        - Corporate Action Data
+      summary: Update corporate action header flags for the actual zspa
+      description: Update corporate action header flags for the actual zspa
+      operationId: updateCorporateActionHeaderData
+      parameters:
+        - name: spaId
+          in: query
+          required: true
+          description: Can spa event id
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CorporateActionHeaderData'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorporateActionHeaderData'
+      security:
+        - can_auth:
+            - 'CAN-CA_E'
+  /corporateActionsData/releaseProperties:
+    get:
+      tags:
+        - Corporate Action
+      summary: Get release properties for corporate action
+      description: Get either default or saved in DB release properties for corporate action identified by zspaId
+      operationId: getReleaseProperties
+      parameters:
+        - name: spaId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: fromDb
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseProperties'
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+    put:
+      tags:
+        - Corporate Action
+      summary: Save release properties for corporate action
+      description: Save release properties for corporate action
+      operationId: saveReleaseProperties
+      parameters:
+        - name: spaId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReleaseProperties'
+      responses:
+        '200':
+          description: successful operation
+      security:
+        - can_auth:
+            - 'CAN-CA_E'
+  /corporateActions/canpos/{zspaId}:
+    get:
+      tags:
+        - Corporate Action
+      summary: Finds Corporate Actions by criteria
+      description: Search by corporate action criteria
+      operationId: findCanposByZspaId
+      parameters:
+        - $ref: './shared-resources/common-zspaIds.yaml#/components/parameters/zspaIdInPathRequired'
+        - name: type
+          in: query
+          required: false
+          example: WPOS
+          description: Canpos (POS) Canwpos (WPOS). If not set POS is used
+          schema:
+            type: string
+            enum:
+              - POS
+              - WPOS
+        - name: posIds
+          in: query
+          required: false
+          description: Canpos ids
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Canpos'
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/canposlist:
+    get:
+      tags:
+        - Corporate Action
+      summary: Finds Corporate Actions by criteria
+      description: Search by corporate action criteria
+      operationId: getCanposListByPosIds
+      parameters:
+        - name: posIds
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Canpos'
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/canlgs/{zspaId}:
+    get:
+      tags:
+        - Corporate Action
+      summary: Finds Corporate Actions by criteria
+      description: Search by corporate action criteria
+      operationId: findCanlgsByZspaId
+      parameters:
+        - $ref: './shared-resources/common-zspaIds.yaml#/components/parameters/zspaIdInPathRequired'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Canlgs'
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/filterSpaIds:
+    get:
+      tags:
+        - Corporate Action
+      summary: Filter Spa IDs according to given filter parameters
+      description: Filter Spa IDs (given as one of filter params) according to given filter parameters
+      operationId: filterSpaIds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilterParams'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /corporateActions/dataForTodos:
+    get:
+      tags:
+        - Corporate Action
+      summary: Get data for given Spa IDs
+      description: Get data used by TODO module for given list of Spa IDs
+      operationId: getCorpActionDataForTodos
+      parameters:
+        - name: spaIds
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataForTodo'
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /disclosureOwners/findDiscByIdWithResponses:
+    get:
+      tags:
+        - Nsd Disclosure
+      summary: Get disclosure with responses (helper for nsd-disclosure module)
+      operationId: findDiscByIdWithResponses
+      parameters:
+        - name: disclosureId
+          in: query
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Disclosure'
+      security:
+        - can_auth:
+            - 'CAN-CA_V'
+  /disclosureOwners/clientResponses:
+    delete:
+      tags:
+        - Nsd Disclosure
+      summary: Delete all disclosure owners client responses for all securities accounts (helper for nsd-disclosure module)
+      operationId: deleteClientResponses
+      parameters:
+        - name: disclosureId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+      security:
+        - can_auth:
+            - 'CAN-CA_E'
+    post:
+      tags:
+        - Nsd Disclosure
+      summary: Create disclosure owners client responses for given sec. account (helper for nsd-disclosure module)
+      operationId: createClientResponses
+      parameters:
+        - name: disclosureId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: nummerC
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ClientResponse'
+      responses:
+        '200':
+          description: OK
+      security:
+        - can_auth:
+            - 'CAN-CA_E'
+    put:
+      tags:
+        - Nsd Disclosure
+      summary: Replace disclosure owners client responses for given sec. account (helper for nsd-disclosure module)
+      operationId: replaceClientResponses
+      parameters:
+        - name: disclosureId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: nummerC
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ClientResponse'
+      responses:
+        '200':
+          description: OK
+      security:
+        - can_auth:
+            - 'CAN-CA_E'
+  /corporateActionsManagement/dummy:
+    get:
+      tags:
+        - corporate action
+      summary: Dummy action
+      description: >-
+        Operation has no effect
+      operationId: dummyCorporateAction
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: boolean
+  /corporateActionsManagement/corporateAction/duplicate:
+    post:
+      tags:
+        - Corporate Action Management
+      summary: Finds Corporate Actions by criteria
+      description: Search by corporate action criteria
+      operationId: duplicateCorporateAction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DuplicateCorporateAction'
+      responses:
+        '200':
+          description: return the spa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Canspa'
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_E'
+  /corporateActionsManagement/corporateAction/deactivate/{spaId}:
+    delete:
+      tags:
+        - Corporate Action Management
+      summary: Deactivates given corporate action
+      description: >-
+        Set the corporation action status to G
+      operationId: deleteCorporateAction
+      parameters:
+        - name: spaId
+          in: path
+          required: true
+          example: 12345
+          description: Corporate action identification
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Whether the corporate action was deleted
+          content:
+            application/json:
+              schema:
+                type: boolean
+      security:
+        - can_auth:
+            - 'CAN-CA_E'
+  /corporateActionsManagement/corporateAction/withdraw/{spaId}:
+    delete:
+      tags:
+        - Corporate Action Management
+      summary: Withdraw given corporate action
+      description: >-
+        ??
+      operationId: withdrawCorporateAction
+      parameters:
+        - name: spaId
+          in: path
+          required: true
+          example: 12345
+          description: Corporate action identification
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Whether the corporate action was withdrawn
+          content:
+            application/json:
+              schema:
+                type: boolean
+      security:
+        - can_auth:
+            - 'CAN-CA_E'
+  /corporateActionsManagement/corporateAction/forCorrection:
+    post:
+      tags:
+        - Corporate Action Management
+      summary: Withdraw given corporate action
+      description: >-
+        Corporate action decided to take back in process for correction from ready for release workflow state to input needed
+      operationId: forCorrection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CorporateActionForCorrection'
+      responses:
+        '200':
+          description: successful operation corporate action workflow status changed to input needed
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_E'
+  /corporateActionsManagement/corporateAction/releaseEvent:
+    post:
+      tags:
+        - Corporate Action Management
+      summary: Withdraw given corporate action
+      description: >-
+        Corporate action decided to take back in process for correction from ready for release workflow state to input needed
+      operationId: releaseEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IdRequestBody'
+      responses:
+        '200':
+          description: return the last active zspa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Canzspa'
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_SW'
+  /corporateActionsManagement/corporateAction/validateRelease:
+    get:
+      tags:
+        - Corporate Action Management
+      summary: Validate event swift values
+      description: Validate the entries by a preset ruleset in the canevent_validat table
+      operationId: validateReleaseEvent
+      parameters:
+        - $ref: './shared-resources/common-zspaIds.yaml#/components/parameters/zspaIdInQuery'
+      responses:
+        '200':
+          description: return a list of validation errors if not valid
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventValidationError'
+        '400':
+          description: Invalid status value
+      security:
+        - can_auth:
+            - 'CAN-CA_SW'
+  /corporateActions/agent-disclosure-status:
+    put:
+      tags:
+        - Agent Disclosure
+      summary: Updates or creates Agent disclosure status
+      description: Updates the status of the csv generation and processing
+      operationId: updateAgentDisclosureStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentDisclosureStatusBody'
+      responses:
+        '200':
+          description: successful operation
+  /corporateActions/update-agent-disclosure-standing-instructions-status:
+    put:
+      tags:
+        - Agent Disclosure
+      summary: Updates or creates Agent disclosure status
+      description: Updates the status of the csv generation and processing
+      operationId: updateAgentDisclosureStandingInstructionsStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentDisclosureStandingInstructionsStatusBody'
+      responses:
+        '200':
+          description: successful operation
+components:
+  securitySchemes:
+    can_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: 'https://rzbtomt01.at.rzb.rbg.cc/cantest/login'
+          scopes:
+            #CORPORATE ACTIONS
+            'CAN-DEV_V': CAN Corporate Action - development feature - view
+            'CAN-CA_V': CAN Corporate Action - view
+            'CAN-CA_E': CAN Corporate Action - edit
+            'CAN-CA_SW': CAN Corporate Action - send
+            'CAN-GSS_GO': CAN Corporate Action - send
+            #VIP KUNDEN
+            'CAN-PK_V': CAN VIP-Kunden - view
+            'CAN-PK_E': CAN VIP-Kunden - edit
+            'CAN-VK_V': CAN VIP-KundenwÃ¼nsche - view
+            'CAN-VK_E': CAN VIP-KundenwÃ¼nsche - edit
+            #ELLA
+            'CAN-ELLA_T': CAN ELLA Schematransfer
+            'CAN-ELLA_E': CAN ELLA
+            'CAN-ELLA_V': CAN ELLA View
+            #WAC
+            'CAN-WAC_V': CAN Maintenance screen view
+            'CAN-WAC_E': CAN Maintenance screen edit
+            #TODOroles
+            'CAN-TD_E': CAN TODO edit
+            'CAN-TD_V': CAN TODO view
+            # GIG API Roles
+            'GIG_API': GIG API permission
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+  #-------------------------------
+  # Reusable operation parameters
+  #-------------------------------
+  #@QueryParam("sort") String sort,
+  #@Pattern(regexp ="\\b(?:asc|desc)\\b") @QueryParam("order") String order,
+  #@QueryParam("page") Integer page,
+  #@QueryParam("pageSize") Integer pageSize
+
+  parameters:
+    zspaStatus:
+      name: zspaStatus
+      in: query
+      example: E
+      description: Event zspa status - Alle (all), Erfasst (E), Freigegeben (F), Versendet (V)
+      schema:
+        $ref: '#/components/schemas/ZspaStatus'
+    zspaWfStatus:
+      name: zspaWfStatus
+      in: query
+      example: DONE
+      description: Current workflow status of an event
+      schema:
+        $ref: '#/components/schemas/ZspaWfStatus'
+    spaCanstat:
+      name: spaCanstat
+      in: query
+      example: ADV
+      description: Reflecting stage in the workflow - All (all), Preadvice (PRE), Advice (ADV), Reminder (REM)
+      schema:
+        $ref: '#/components/schemas/SpaCanStatus'
+    spaStatus:
+      name: spaStatus
+      in: query
+      example: rddt_date
+      description: Event spa status - Active (A), Deleted (G)
+      schema:
+        $ref: '#/components/schemas/ActiveStatus'
+    nsdResponseStatus:
+      name: nsdResponseStatus
+      in: query
+      description: property to filter the records with disclosures that have a certain response from NSD
+      schema:
+        $ref: '#/components/schemas/NsdResponseStatus'
+
+    caFromDate:
+      name: caFromDate
+      in: query
+      example: 2017-07-21
+      description: Can event spa date - creation date of the event
+      schema:
+        type: string
+        format: date
+    caToDate:
+      name: caToDate
+      in: query
+      example: 2017-07-21
+      description: Can event spa date- creation date of the event
+      schema:
+        type: string
+        format: date
+    canSpaAttrs: #deepObject https://swagger.io/docs/specification/serialization/ /users?id[role]=admin&id[firstName]=Alex
+      name: canSpaAttrs
+      in: query
+      example: 2017-07-21
+      description: Can event spa date- creation date of the event
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/SearchByCanspaAttrType'
+
+  #-------------------------------
+  # Reusable schemas (data models)
+  #-------------------------------
+  schemas:
+    SpaCanStatus: # '#/components/schemas/SpaCanStatus'
+      type: string
+      description: Reflecting stage in the workflow - Preadvice (PRE), Advice (ADV), Reminder (REM)
+      enum:
+        - PRE
+        - ADV
+        - REM
+    ActiveStatus:
+      type: string
+      enum:
+        - A
+        - G
+      description:
+        A - Active
+        G - Deleted
+      example: A
+    NsdResponseStatus:
+      type: string
+      description: Reflecting what should be the positiveNsdResponse value from the disclosure
+      enum:
+        - COMPLETE
+        - INCOMPLETE
+        - INCOMPLETE_LATE
+        - NO_RESPONSE
+      example: INCOMPLETE
+    ZspaStatus:
+      type: string
+      description: Event zspa status - Erfasst (E), Freigegeben (F), Versendet (V)
+      enum:
+        - E
+        - F
+        - V
+    ZspaSendStatus:
+      type: string
+      enum:
+        - GDP
+        - GOL
+      description:
+        GDP - GEOS daten pool
+        GOL - GEOS online
+    ZspaWfStatus:
+      type: string
+      description: Event
+      enum:
+        - EVENT_CREATED
+        - INPUT_NEEDED
+        - TRANSLATION_NEEDED
+        - READY_FOR_RELEASE
+        - FOR_CORRECTION
+        - SEND_SERIAL_LETTER
+        - AWAIT_EVENT_UPDATE
+        - DONE
+        - NOTIFICATION_DONE
+        - DELETED
+    AgentDisclosureStatus:
+      type: string
+      description: ERROR = 'E' COMPLETED = 'C' UPLOADED = 'U' NOT STARTED = 'N' CLOSED NO PROCESSING 'W'
+      enum:
+        - N
+        - U
+        - E
+        - C
+        - W
+    SearchByCanspaAttrType:
+      title: Search by can spa attribute type
+      description: Holds key value pair to filter by canspa attributes
+      type: object
+      required:
+        - spaattrdefId
+      properties:
+        spaattrdefId:
+          type: integer
+          format: int64
+          description: Attribute definition. Reffers to a definition in db - Attribute, name, mandatory, attribute type (select/text etc), default value and the linkage to event type
+          example: 1
+        spaattrValue:
+          type: string
+          maxLength: 255
+          description: String value of canspaattr for a given definition
+          example: RU TAX
+    CanspaAttr:
+      title: Attribute values used in Corporate actions details
+      description: Hold attribute values for a specific event
+      type: object
+      properties:
+        spaattrId:
+          type: integer
+          format: int64
+          description: Id
+        spaId:
+          type: integer
+          format: int64
+          description: Can event identification
+        spaattrdefName:
+          type: string
+          description: Attribute definition name.
+          example: 1
+        spaattrdefId:
+          type: integer
+          format: int64
+          description: Attribute definition. Reffers to a definition in db - Attribute, name, mandatory, attribute type (select/text etc), default value and the linkage to event type
+          example: 1
+        spaattrValue:
+          type: string
+          description: String value of canspaattr for a given definition
+          example: RU TAX
+        definitionIdentifier:
+          type: string
+          description: Unique identifier of the definition
+          example: AGENT_EMAIL
+    SearchCanInstanceResult:
+      title: Can instance search result bean
+      description: Can event data filtered according search criteria
+      type: object
+      properties:
+        cantypId:
+          type: integer
+          format: int64
+          description: Corporate action template type
+        spaId:
+          type: integer
+          format: int64
+          description: Can event identification
+        zspaId:
+          $ref: './shared-resources/common-zspaIds.yaml#/components/schemas/ZspaIdSchema'
+        isinIdent:
+          type: string
+          description: Can event ISIN
+        corpRef:
+          type: string
+          description: CAN Corporate action unique ID
+        coaf:
+          type: string
+        bezeichnung:
+          type: string
+        cantypBez:
+          type: string
+        duplicationProhibitedBefore:
+          type: string
+          format: date
+        spaDatum:
+          type: string
+          format: date
+        spaLoeschbar:
+          type: boolean
+        spaStatus:
+          $ref: '#/components/schemas/ActiveStatus'
+          description: status of the corporat action active/inactive
+        spaCaRef:
+          type: string
+        zspaStatus:
+          $ref: '#/components/schemas/ZspaStatus'
+        deletable:
+          type: boolean
+        spaCanstat:
+          $ref: '#/components/schemas/SpaCanStatus'
+          description: Reflecting stage in the workflow - All (all), Preadvice (PRE), Advice (ADV), Reminder (REM)
+        zspaKzSende:
+          type: string
+          enum:
+            - GDP
+            - GOL
+          description:
+            GDP - GEOS daten pool
+            GOL - GEOS online
+          example: GDP
+        zspaKzPre:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+        zspaDatumSend:
+          type: string
+          format: date
+          description: Letzte Freigabe
+        zspaDatumGol:
+          type: string
+          format: date
+          description: GOL-Stichtag
+        canlgs:
+          type: array
+          items:
+            $ref: './shared-resources/common.yaml#/components/schemas/SearchLagerstelleType'
+          description: Lagerstellen
+        canattrs:
+          type: array
+          items:
+            $ref: '#/components/schemas/CanspaAttr'
+        vluWert:
+          type: string
+          description: 23G
+        rddtVal:
+          type: string
+          example: 20211027100000
+        rdteVal:
+          type: string
+          example: 20211027100000
+        zspaDatumAdv:
+          type: string
+          format: date
+        cantypStatus:
+          $ref: '#/components/schemas/ActiveStatus'
+        zspaKzToIss:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+        zspaWfStatus:
+          $ref: '#/components/schemas/ZspaWfStatus'
+        zspaSlettersWasSent:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+        agentDisclosureStatus:
+          $ref: '#/components/schemas/AgentDisclosureStatus'
+        agentDisclosureStdiProcessed:
+          type: boolean
+        positiveNsdResponse:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+    SearchCanInstanceResultTax:
+      allOf:
+        - $ref: '#/components/schemas/SearchCanInstanceResult'
+        - type: object
+          properties:
+            nsdDisclosureEventStatus:
+              type: string
+              description: >-
+                CLOSED - if all lagerstellen defined in the can event have processed disclosure with status CLOSED
+                OPEN - if there exists at least one lagerstelle linked to the can event which has unprocessed disclosure
+              enum:
+                - OPEN
+                - CLOSED
+            nsdDisclosureLoschenIsAvailable:
+              type: boolean
+              description: Not asctivated at the moment
+            rdteVal:
+              type: string
+              description: Used only for Suche RU Tax DSCL
+    SearchCanInstanceResultWithPos:
+      type: object
+      properties:
+        posMenge:
+          type: number
+          format: int64
+        posLgs:
+          type: string
+        posNummer:
+          type: string
+        positId:
+          type: string
+        posId:
+          type: integer
+          format: int64
+        zspaId:
+          $ref: './shared-resources/common-zspaIds.yaml#/components/schemas/ZspaIdSchema'
+        spaId:
+          type: integer
+          format: int64
+          description: Can event identification
+        isinIdent:
+          type: string
+          description: Can event ISIN
+        corpRef:
+          type: string
+          description: CAN Corporate action unique ID
+        src:
+          type: string
+          description: pos/wpos
+        spaDatum:
+          type: string
+          format: date
+        spaCanstat:
+          $ref: '#/components/schemas/SpaCanStatus'
+          description: Reflecting stage in the workflow - All (all), Preadvice (PRE), Advice (ADV), Reminder (REM)
+        bezeichnung:
+          type: string
+        caev:
+          type: string
+        functionOfMessage:
+          type: string
+        camv:
+          type: string
+        lastReleaseDate:
+          type: string
+          format: date-time
+        firstReleaseDate:
+          type: string
+          format: date-time
+        rddt:
+          type: string
+        zspaInstructableViaGIG:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+    CorporateActionDetailsForGIG:
+      title: Details of a CA for GIG
+      description: CA details
+      type: object
+      properties:
+        shaanztextd:
+          type: string
+        shaanztexte:
+          type: string
+        shaqualifiertext:
+          type: string
+        shagruppe:
+          type: integer
+          format: int32
+        vluwert1:
+          type: string
+        vluwert2:
+          type: string
+        vluwert3:
+          type: string
+        cansblkid:
+          type: integer
+          format: int32
+        vlusblksq:
+          type: integer
+          format: int32
+        canblkid:
+          type: integer
+          format: int32
+        shaanznr:
+          type: integer
+          format: int32
+        tagbez:
+          type: string
+        tagtag:
+          type: string
+        tagnummer:
+          type: integer
+          format: int32
+        vlutagrow:
+          type: integer
+          format: int32
+        vlublksq:
+          type: integer
+          format: int32
+        shacontent:
+          type: string
+        txttext:
+          type: string
+        candefbez:
+          type: string
+        cancdbez:
+          type: string
+        identnwae:
+          type: string
+    CorporateActionResultTaxPage:
+      title: Can instance search result bean
+      description: Can event data filtered according search criteria
+      allOf:
+        - $ref: './shared-resources/common.yaml#/components/schemas/Page'
+        - type: object
+          properties:
+            '_embedded':
+              items:
+                $ref: '#/components/schemas/SearchCanInstanceResultTax'
+    CorporateActionHistory:
+      title: Corporate action history
+      description: Corporate action history (canzspa_log)
+      type: object
+      properties:
+        spaId:
+          type: integer
+          format: int64
+          example: 1111
+          description: Can event id
+        cantypBez:
+          example: 'Trading Status: Active'
+          description: Corporate action event type name
+          type: string
+        isin:
+          $ref: './shared-resources/common-isins.yaml#/components/schemas/IsinSchema'
+        description:
+          type: string
+          example: Magnitogorsk Iron & Steel Work;Reg.Shs(Sp.GDRs Reg.S)/13 RL1
+          description: Description of security - Fivfi.bezeichnung
+        duplicateOrigSpaId:
+          type: integer
+          format: int64
+          example: 1111
+          description: Can event id from where the event was copied from
+        historyItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/CorporateActionHistoryItem'
+    CorporateActionGEOSReconciliationStatus:
+      title: Corporate action GEOS Reconciliation Status
+      description: Reconciliation status from GEOS for a custodian
+      type: object
+      properties:
+        votingPhase:
+          type: string
+          description: Abstimmphase
+        number:
+          description: nummer
+          type: integer
+        date:
+          type: string
+          format: date
+          description: erfassungsdatum
+        extCorpRef:
+          type: string
+          description: ext_terminreferenz
+    CorporateActionHistoryItem:
+      title: Corporate action history
+      description: Corporate action history (canzspa_log)
+      type: object
+      properties:
+        zspaId:
+          $ref: './shared-resources/common-zspaIds.yaml#/components/schemas/ZspaIdSchema'
+        zspaLogStatus:
+          type: string
+          description: D - delete, I - insert, U - update
+          enum:
+            - D
+            - I
+            - U
+        zspaStatus:
+          $ref: '#/components/schemas/ZspaStatus'
+        zspaSlettersWasSent:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+        zspaKzLast:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+        zspaKzPre:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+        sendSwift:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+        zspaKzSende:
+          $ref: '#/components/schemas/ZspaSendStatus'
+        zspaUsrErf:
+          type: string
+          description: zspaUsrErf
+        zspaUsrLast:
+          type: string
+          description: zspaUsrLast
+        zspaUsr:
+          type: string
+          description: zspaUsr
+        vluWert:
+          type: string
+          description: vluWert
+        cantypBez:
+          type: string
+          description: cantypBez
+        spaCanstat:
+          type: string
+          description: spaCanstat
+        zspaDatSortKey:
+          type: string
+          description: zspaDatSortKey
+        changeType:
+          type: string
+          description: CHANGE(Anderung), DUPLICATION(Duplizierung), CREATION(Erfassung), APPROVAL(Freigabe), DISPATCH(Versand), FORWARDING(Weitergabe zum Versand);
+          enum:
+            - CHANGE
+            - DUPLICATION
+            - CREATION
+            - APPROVAL
+            - DISPATCH
+            - FORWARDING
+        user:
+          type: string
+          description: user
+        zspaDat:
+          type: string
+          format: date-time
+          description: zspaDat
+        zspaDatLast:
+          type: string
+          format: date-time
+          description: zspaDatLast
+        zspaDatumGol:
+          type: string
+          format: date
+          description: zspaDatumGol
+        zspaDatumSend:
+          type: string
+          format: date
+          description: zspaDatumSend
+        zspaDatumRem:
+          type: string
+          format: date
+          description: zspaDatumRem
+        zspaDatErf:
+          type: string
+          format: date-time
+          description: zspaDatErf
+    OrderHead:
+      title: Can instance search result bean
+      description: Can event data filtered according search criteria
+      type: object
+      properties:
+        corpRef:
+          type: string
+          description: Corporate action CAN refference
+        fivFiId:
+          type: string
+          description: Description
+        orderHeadIsin:
+          type: string
+          description: Description
+        orderHeadInterIsin:
+          type: string
+          description: >-
+            Optional Sequence C Intermediate Securities (OSIS) - Identification of the Financial Ins (35B).
+            OSIS / 35B
+            OSIS / Identification of the Financial Ins (35B) - Can be multiple times in format ISIN XY0000000000. We are interestin about the isin value XY0000000000.
+        orderHeadFDesc:
+          type: string
+          description: Description
+        orderHeadFBez:
+          type: string
+          description: Description
+        orderHeadSSPA:
+          type: string
+          description: Description
+        orderHeadZSPA:
+          type: string
+          description: Description
+        orderHeadRatio1:
+          type: string
+          description: Description
+        orderHeadRatio2:
+          type: string
+          description: Description
+        orderHeadStatus:
+          type: string
+          description: RzbCanCusOptData
+        intermediateSELL:
+          type: string
+          description: block (OSIS), tag(22F), qualifier (SELL)
+        intermediateSecurityIsin:
+          type: string
+          description: Description
+        quantityIntermediateRatio:
+          type: number
+          format: double
+          description: OSIS / 92D / - In case Abs(vlu2) > 0.000001 = vlu1 / vlu2 else is empty
+        isMandatoryCorporateAction:
+          description: MT564  / block (MSGI), tag(22F,22f), qualifier (CAMV). If value = MAND is mandatory
+          type: boolean
+        isAgentDisclosure:
+          description: Is Agent Disclosure
+          type: boolean
+        cantypId:
+          type: integer
+          format: int64
+          description: Corporate action template type
+        caevCode:
+          type: string
+          description: Caev code
+        camv:
+          type: string
+          description: Voluntary / Mandatory indicator
+        blockUntil:
+          type: string
+          format: date
+          description: Date until when newly created instructions should be blocked
+    OptionId:
+      title: Option ID uniquely identifying customer option in the event
+      type: object
+      properties:
+        optionCode:
+          type: string
+        optionNumber:
+          type: string
+    Option:
+      title: Customer option data
+      allOf:
+        - $ref: '#/components/schemas/OptionId'
+        - type: object
+          properties:
+            responseDate:
+              $ref: '#/components/schemas/OptionResponseDate'
+            rate:
+              $ref: '#/components/schemas/OptionRate'
+    OptionRate:
+      title: Securities rate
+      type: object
+      properties:
+        qualifier:
+          description: Rate (92D) qualifier ADEX, ADSR, NEWO
+          type: string
+        valueA:
+          description: First rate value = A if rate is written as A:B
+          type: number
+          format: float
+        valueB:
+          description: Second rate value = B if rate is written as A:B
+          type: number
+          format: float
+    OptionResponseDate:
+      title: Response date
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of response date value - A(date), B(code), C(datetime). We treat tag 98E (datetime + timezone) as 98C (datetime)
+          enum:
+            - A
+            - B
+            - C
+        qualifier:
+          description: Repsonse date qualifier
+          type: string
+          enum:
+            - EARD
+            - RDDT
+        value:
+          description: Response date value (determine type by 'type' property)
+          type: string
+    DueDate:
+      title: due date of the corporate action with a source
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        source:
+          type: string
+          description: by priority can by XDTE, EFFD , RDTE. If non of them is set TODAY is taken.
+          enum:
+            - XDTE
+            - EFFD
+            - RDTE
+            - TODAY
+    Canlgs:
+      title: Custodian account for corporate action
+      type: object
+      properties:
+        id:
+          description: posId id of the record
+          type: integer
+          format: int64
+        zspaId:
+          $ref: './shared-resources/common-zspaIds.yaml#/components/schemas/ZspaIdSchema'
+        number:
+          description: Custodian account number
+          type: string
+        geosShort:
+          description: Custodian geos short
+          type: string
+    Canpos:
+      title: due date of the corporate action with a source
+      type: object
+      properties:
+        id:
+          description: posId id of the record
+          type: integer
+          format: int64
+        corporateActionId:
+          description: id of the corporate action (for canwpos - spaId) (for canpos - zspaId)
+          type: integer
+          format: int64
+        positId:
+          description: geos identification of the position
+          type: string
+        posNummer:
+          example: 69390003000
+          description: account number
+          type: string
+        posLgs:
+          example: 68179662005
+          description: Lagerstelle number
+          type: string
+        posSwift:
+          description: posSwift
+          type: string
+        posAdrNr:
+          description: posAdrBez
+          example: 00000208P000
+          type: string
+        posAdrBez:
+          description: posAdrBez
+          example: NIEDEROESTERREICH-WIEN
+          type: string
+        posMenge:
+          description: posMenge
+          type: number
+          format: decimal
+    Canspa:
+      title: Corporate action spa
+      description: Corporate action parent level spa
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Corporate action identification
+          example: 1
+        cantypId:
+          type: integer
+          format: int64
+          description: corporate action typ template
+        fiId:
+          type: string
+          description: Id isin reference fivfi
+          example: 4BF7636AC3F1A988
+        mandId:
+          type: string
+          description: mandId
+          example: 31000
+        spaDatum:
+          type: string
+          format: date
+          description: Date of the event creation
+          example: 2003-07-29
+        spaCanstat:
+          $ref: '#/components/schemas/SpaCanStatus'
+        spaKzCorrect:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+        spaStatus:
+          $ref: '#/components/schemas/ActiveStatus'
+        spaCaRef:
+          type: string
+          description: spaCaRef
+        duplicateOrigSpaId:
+          type: integer
+          format: int64
+          description: duplicateOrigSpaId
+        canzspas:
+          type: array
+          items:
+            $ref: '#/components/schemas/Canzspa'
+    Canzspa:
+      title: Corporate action zspa
+      description: Corporate action item level zspa
+      allOf:
+        - $ref: '#/components/schemas/CorporateActionHeaderData'
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+              description: Corporate action identification
+              example: 1
+            zspaKzLast:
+              $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+              description: Indicates if the zspa is the last Working instance
+            zspaKzPre:
+              $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+            zspaKzSb:
+              $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+            zspaKzSende:
+              $ref: '#/components/schemas/ZspaSendStatus'
+            zspaDatumGol:
+              type: string
+              format: date
+              description: Geos online date
+            zspaDatumSend:
+              type: string
+              format: date
+              description: Send date
+            zspaDatumAdv:
+              type: string
+              format: date
+              description: Advice Date
+            zspaKzAdv:
+              $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+            zspaDatumRem:
+              type: string
+              format: date
+              description: zspaDatumRem
+            zspaKzRem:
+              $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+            zspaDatumExp:
+              type: string
+              format: date
+              description: zspaDatumExp
+            zspaDatumUw:
+              type: string
+              format: date
+              description: zspaDatumUw
+            zspaKzSendswift:
+              $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+            zspaStatus:
+              $ref: '#/components/schemas/ZspaStatus'
+            zspaWfStatus:
+              $ref: '#/components/schemas/ZspaWfStatus'
+            zspaSlettersWasSent:
+              type: string
+              description: zspaSlettersWasSent
+            zspaKzToIss:
+              $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+    SvzCanType:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        cantypCode:
+          type: string
+        cantypBez:
+          type: string
+        cantypKzFw:
+          type: string
+        cantypKzOb:
+          type: string
+        cantypStatus:
+          type: string
+        cantypGultAb:
+          type: string
+          format: date
+        cantypBezDe:
+          type: string
+        workflowCategory:
+          type: string
+        duplicationProhibitedBefore:
+          type: string
+          format: date
+    SvzCanTypePage:
+      title: Can type page
+      description: Can type page
+      allOf:
+        - $ref: './shared-resources/common.yaml#/components/schemas/Page'
+        - type: object
+          properties:
+            '_embedded':
+              items:
+                $ref: '#/components/schemas/SvzCanType'
+
+    CorporateActionResultPage:
+      title: Can instance search result bean
+      description: Can event data filtered according search criteria
+      allOf:
+        - $ref: './shared-resources/common.yaml#/components/schemas/Page'
+        - type: object
+          properties:
+            '_embedded':
+              items:
+                $ref: '#/components/schemas/SearchCanInstanceResult'
+    CanspaPage:
+      title: Can instance search result bean
+      description: Can event data filtered according search criteria
+      allOf:
+        - $ref: './shared-resources/common.yaml#/components/schemas/Page'
+        - type: object
+          properties:
+            '_embedded':
+              items:
+                $ref: '#/components/schemas/Canspa'
+    FilterParams:
+      title: Filter parameters
+      description: Filter parameters
+      type: object
+      properties:
+        spaIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+        advDateVon:
+          type: string
+          format: date
+        advDateBis:
+          type: string
+          format: date
+        caevCode:
+          type: string
+        cantypId:
+          type: integer
+          format: int64
+    DataForTodo:
+      title: Corporate action data for Todo
+      description: Corporate action data for Todo
+      type: object
+      properties:
+        spaId:
+          type: integer
+          format: int64
+        zspaId:
+          $ref: './shared-resources/common-zspaIds.yaml#/components/schemas/ZspaIdSchema'
+        advDate:
+          type: string
+          format: date
+        caevCode:
+          type: string
+        cantypId:
+          type: integer
+          format: int64
+    CorporateActionDetails:
+      title: Corporate action details
+      description: Corporate action details
+      allOf:
+        - $ref: '#/components/schemas/CorporateActionHeaderData'
+        - type: object
+          properties:
+            spaId:
+              type: integer
+              format: int64
+              description: Can event identification
+            zspaId:
+              $ref: './shared-resources/common-zspaIds.yaml#/components/schemas/ZspaIdSchema'
+            fiId:
+              type: string
+            cantypId:
+              type: integer
+              format: int64
+            isin:
+              $ref: './shared-resources/common-isins.yaml#/components/schemas/IsinSchema'
+            description:
+              type: string
+            canTypBez:
+              type: string
+            statusCode:
+              type: string
+            zspaUsr:
+              type: string
+            hasCanImpSwiftAddress:
+              type: boolean
+            showIssMeeting:
+              type: boolean
+            useNonSwiftAttrs:
+              type: boolean
+            workflowCategoryType:
+              type: string
+            functionOfMessage:
+              type: string
+            zspaKzToIss:
+              $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+            zspaStatus:
+              $ref: '#/components/schemas/ZspaStatus'
+            zspaWfStatus:
+              $ref: '#/components/schemas/ZspaWfStatus'
+            canspaAttrs:
+              type: array
+              items:
+                $ref: '#/components/schemas/CanspaAttr'
+            canvlus:
+              type: array
+              items:
+                $ref: '#/components/schemas/Canvlu'
+            selectedLagerstellen:
+              type: array
+              items:
+                $ref: '#/components/schemas/LagerstelleType'
+            availableLagerstellen:
+              type: array
+              items:
+                $ref: '#/components/schemas/LagerstelleType'
+            comments:
+              type: array
+              items:
+                $ref: './shared-resources/common.yaml#/components/schemas/Comment'
+    Canvlu:
+      title: Canvlu
+      description: Canvlu
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        vluSblkSq:
+          type: integer
+          format: int32
+        vluBlkSq:
+          type: integer
+          format: int32
+        vluTagRow:
+          type: integer
+          format: int32
+        vluTagSq:
+          type: integer
+          format: int32
+        vluWert:
+          type: string
+        tagId:
+          type: integer
+          format: int64
+        shaId:
+          type: integer
+          format: int64
+    LagerstelleType:
+      title: LagerstelleType
+      description: LagerstelleType
+      type: object
+      properties:
+        lgsNummer:
+          type: string
+        lgsKuerzel:
+          type: string
+        extSafeAccNo:
+          type: string
+        extCorpRef:
+          type: string
+    CorporateActionHeaderData:
+      title: Corporate action header data
+      description: Corporate action header data
+      type: object
+      properties:
+        zspaKzInxboseg:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+        zspaKzInxbodetail:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+        zspaKzInximmed:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+        zspaInstructableViaGIG:
+          $ref: './shared-resources/common.yaml#/components/schemas/YesNoStatus'
+        zspaBlockInxUntil:
+          type: string
+          format: date
+          description: Date until when newly created instructions should be blocked
+    CanspaAttrDefinition:
+      title: CanspaAttrDefinition
+      description: CanspaAttrDefinition
+      type: object
+      properties:
+        attrDefId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        definitionIdentifier:
+          type: string
+        type:
+          type: string
+        mandatory:
+          type: boolean
+        values:
+          type: array
+          items:
+            format: string
+        status:
+          $ref: '#/components/schemas/ActiveStatus'
+        order:
+          type: integer
+        canTypeId:
+          type: integer
+          format: int64
+    ReleaseProperties:
+      title: Release properties
+      description: Release properties
+      type: object
+      properties:
+        sendPreadvice:
+          type: boolean
+        sendSwift:
+          type: string
+        sendToSystem:
+          type: string
+        golDate:
+          type: string
+          format: date
+        advDate:
+          type: string
+          format: date
+        remDate:
+          type: string
+          format: date
+        uwDate:
+          type: string
+          format: date
+        enableSendPreadvice:
+          type: boolean
+        enableSendSwift:
+          type: boolean
+        enableSendToSystem:
+          type: boolean
+        enableZspaKzToIss:
+          type: boolean
+        enableGolDate:
+          type: boolean
+        enableAdviceDate:
+          type: boolean
+        enableReminderDate:
+          type: boolean
+        enableUwDate:
+          type: boolean
+        isWithdrawn:
+          type: boolean
+    #    CandiscrespOwner:
+    #      title: CandiscLgs
+    #      description: CandiscLgs
+    #      type: object
+    #      properties:
+    #        lgsNummer:
+    #          type: string
+    #        clients:
+    #          type: array
+    #          items:
+    #            $ref: '#/components/schemas/CandiscClient'
+    CandiscClient:
+      title: CandiscLgs
+      description: CandiscLgs
+      type: object
+      properties:
+        nummerC:
+          type: string
+        ownersCount:
+          type: integer
+    #        owners:
+    #          type: array
+    #          items:
+    #            $ref: '#/components/schemas/CandiscrespOwner'
+    Disclosure:
+      title: Disclosure
+      description: Disclosure
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        lgsNumber:
+          type: string
+        clients:
+          type: array
+          items:
+            $ref: '#/components/schemas/CandiscClient'
+    ClientResponse:
+      title: Client response
+      description: Client response
+      type: object
+      properties:
+        entityType:
+          type: string
+          enum: [ INDV, LEGL ]
+        accountType:
+          type: string
+          enum: [ AFUN,AMOR,CMRD,CMRL,DEPR,EMIS,FMCC,FNOM,FROW,FRTL,FRTR,FTRS,FUNI,INPR,ISSR,JNRH,MNCP,MORD,NOMI,NTRY,CORT,OTHR,OWNE,PLED,RUFR,RUSU,STBC,TRSR,TRUR,TRUS,UKWN,ESRA,ESRD,LIQN,NPRD,NOCU ]
+        leiCode:
+          type: string
+        name:
+          type: string
+        countryCode:
+          type: string
+        postalCode:
+          type: string
+        address:
+          type: string
+        documentType:
+          type: string
+          enum: [ _OTHR,_LICS,_STIC,_REGN,_OGRN,_INCR,_USTV,_00,_01,_02,_03,_04,_05,_06,_07,_09,_10,_11,_12,_13,_14,_21,_22,_23,_26,_27,_91 ]
+        documentName:
+          type: string
+        documentNumber:
+          type: string
+        issueDate:
+          type: string
+          format: date
+        issueAuthName:
+          type: string
+        taxStatusCode:
+          type: string
+          enum: [ R, N ]
+          description:
+            R - resident (1)
+            N - non-resident (2)
+        taxExemption:
+          type: boolean
+        qtyOfSecurities:
+          type: number
+    DuplicateCorporateAction:
+      title: DuplicateCorporateAction
+      description: DuplicateCorporateAction
+      type: object
+      required:
+        - zspaId
+        - isin
+      properties:
+        zspaId:
+          $ref: './shared-resources/common-zspaIds.yaml#/components/schemas/ZspaIdSchema'
+        isin:
+          $ref: './shared-resources/common-isins.yaml#/components/schemas/IsinWithPatternSchema'
+    CorporateActionForCorrection:
+      title: CorporateActionForCorrection
+      description: Data from event in ready for release state which had to be taken back for correctin data
+      type: object
+      required:
+        - zspaId
+        - comment
+      properties:
+        zspaId:
+          $ref: './shared-resources/common-zspaIds.yaml#/components/schemas/ZspaIdSchema'
+        comment:
+          type: string
+          maxLength: 1000
+    IdRequestBody:
+      title: IdRequestBody
+      description: Data from event in ready for release state which had to be taken back for correctin data
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          format: int64
+    AgentDisclosureStatusBody:
+      title: AgentDisclosureStatusBody
+      description: Data for the AgentDisclosureStatus
+      type: object
+      required:
+        - status
+        - corpRef
+      properties:
+        status:
+          $ref: '#/components/schemas/AgentDisclosureStatus'
+        corpRef:
+          type: string
+    AgentDisclosureStandingInstructionsStatusBody:
+      title: AgentDisclosureStandingInstructionsStatusBody
+      description: Data for the AgentDisclosureStandingInstructionsStatus
+      type: object
+      required:
+        - isProcessed
+        - corpRef
+      properties:
+        isProcessed:
+          type: boolean
+        corpRef:
+          type: string
+    SpaZspaPair:
+      title: Spa - zspa pair
+      description: Spa ID mapped to current zspa ID
+      type: object
+      required:
+        - spaId
+        - zspaId
+      properties:
+        spaId:
+          type: integer
+          format: int64
+        zspaId:
+          $ref: './shared-resources/common-zspaIds.yaml#/components/schemas/ZspaIdSchema'
+    IsinSanction:
+      title: ISIN Sanction
+      description: ISIN sanction data
+      type: object
+      properties:
+        isin:
+          $ref: './shared-resources/common-isins.yaml#/components/schemas/IsinSchema'
+        status:
+          type: string
+        dateFrom:
+          type: string
+          format: date-time
+        dateTo:
+          type: string
+          format: date-time
+    EventValidationError:
+      title: Event Validation Error
+      description: Contains info about validations for the event values
+      type: object
+      properties:
+        errorMessage:
+          type: string
+    Holiday:
+      allOf:
+        - $ref: './shared-resources/common.yaml#/components/schemas/AuditFields'
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            name:
+              type: string
+            date:
+              type: string
+              format: date
+    GIGParamsInBody:
+      title: Filter parameters for GIG API corporate actions
+      description: Contains all filters in body because GIG don't want to show them in the url
+      type: object
+      properties:
+        dateFrom:
+          type: string
+          format: date
+          description: Date to filter By CanStats
+          example: 2017-07-21
+        dateTo:
+          type: string
+          format: date
+          description: Date to filter By CanStats
+          example: 2017-07-21
+        accountNumbers:
+          type: array
+          items:
+            type: string
+          description: List of account numbers for the positions filtering
+          example:
+            - 60684420000
+            - 60684423420
+        cantypCaevs:
+          type: array
+          items:
+            type: string
+          description: List of caev code names
+          example:
+            - TEND
+        functionOfMessage:
+          type: array
+          items:
+            type: string
+          description: List of function of message code names
+          example:
+            - NEWM
+            - REPL
+        camv:
+          type: array
+          items:
+            type: string
+          description: List of 22F - CAMV -Mandatory/Voluntary Indicator
+          example:
+            - CHOS
+            - VOLU
+            - MAND
+        language:
+          $ref: './shared-resources/common.yaml#/components/schemas/LanguageType'
+          description: Language for the details
+          example: EN
+        isin:
+          $ref: './shared-resources/common-isins.yaml#/components/schemas/IsinWithLengthValidation'
