@@ -43,6 +43,41 @@ export interface SearchCanInstanceResultWithPos {
     zspaInstructableViaGIG?: YesNoStatus;
 }
 
+// Corporate Action Details Types
+export interface CorpActionDetails {
+    zspaId: string;
+    spaId: number;
+    isinIdent: string;
+    spaDatum: string;  // format: date
+    posMenge?: number;
+    zspaInstructableViaGIG?: YesNoStatus;
+    lastReleaseDate?: string;  // format: date-time
+    language?: LanguageType;
+    caev?: string;
+    camv?: string;
+}
+
+export interface CorpActionReference {
+    zspaId: string;
+    caev?: string;
+    camv?: string;
+    corpRef?: string;
+    bezeichnung?: string;
+    spaDatum?: string;  // format: date
+}
+
+export interface CanPosition {
+    accountNumber: string;
+    posMenge?: number;
+    posLgs?: string;
+    posNummer?: string;
+}
+
+export interface CanPosResponse {
+    zspaId: string;
+    positions: CanPosition[];
+}
+
 // Pagination Parameters (Query Parameters)
 export interface PaginationParams {
     page?: number;
