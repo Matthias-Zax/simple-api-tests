@@ -12,7 +12,6 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -26,7 +25,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'https://rzbtomt01.at.rzb.rbg.cc/cantest',
+    baseURL: process.env.BASE_URL || 'https://rzbtomt01.at.rzb.rbg.cc/cantest',
     /* Ignore HTTPS errors */
     ignoreHTTPSErrors: true,
     /* Configure request timeout */
@@ -43,11 +42,33 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
-      name: 'chrome',
-      use: { 
+      name: 'api-tests',
+      testDir: './tests/api',
+      testMatch: /.*\.spec\.ts/,
+      retries: 1
+    },
+    {
+      name: 'db-tests',
+      testDir: './tests/db',
+      testMatch: /.*\.spec\.ts/,
+      retries: 0
+    },
+    {
+      name: 'gui-tests',
+      testDir: './tests/gui',
+      testMatch: /.*\.spec\.ts/,
+      use: {
         ...devices['Desktop Chrome'],
-        ignoreHTTPSErrors: true  // Also set at project level for extra safety
-      }
+        viewport: { width: 1280, height: 720 },
+        screenshot: 'only-on-failure',
+        video: 'retain-on-failure',
+        trace: 'retain-on-failure',
+        ignoreHTTPSErrors: true,
+        actionTimeout: 10000,
+        navigationTimeout: 15000,
+        headless: false // Set to true in CI environment
+      },
+      retries: 1
     }
   ],
 });

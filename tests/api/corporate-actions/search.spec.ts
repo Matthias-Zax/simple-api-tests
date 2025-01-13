@@ -1,5 +1,5 @@
-import { test, expect } from '../fixtures/test-fixtures';
-import { corporateActionsTestData as testData } from '../../test-data/corporate-actions.data';
+import { test, expect } from '../../fixtures/test-fixtures';
+import { corporateActionsTestData as testData } from '../../../test-data/corporate-actions.data';
 import { 
     GIGParamsInBody, 
     SearchCanInstanceResultWithPos, 
@@ -9,7 +9,7 @@ import {
     CanTypeId,
     SpaCanstat,
     YesNoStatus
-} from '../../test-data/interfaces/api-interfaces';
+} from '../../../test-data/interfaces/api-interfaces';
 
 test.describe('Corporate Actions Search API', () => {
     test('T1_SearchCorporateActions_ValidFilters_ReturnsFilteredList @smoke', async ({ request, apiHelpers, validator }) => {

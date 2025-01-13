@@ -1,6 +1,6 @@
-import { test, expect } from '../fixtures/test-fixtures';
-import { corporateActionsTestData as testData } from '../../test-data/corporate-actions.data';
-import { WithdrawRequest, WithdrawResponse } from '../../test-data/interfaces/api-interfaces';
+import { test, expect } from '../../fixtures/test-fixtures';
+import { corporateActionsTestData as testData } from '../../../test-data/corporate-actions.data';
+import { WithdrawRequest, WithdrawResponse } from '../../../test-data/interfaces/api-interfaces';
 
 test.describe('Corporate Actions Management API', () => {
     test('T1_WithdrawCorporateAction_ValidData_ActionWithdrawn @smoke', async ({ request, apiHelpers }) => {

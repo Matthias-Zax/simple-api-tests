@@ -14,21 +14,35 @@ can-api-tests/
 ├── config/
 │   └── environment.config.ts    # Environment configurations
 ├── test-data/
-│   ├── corporate-actions.data.ts # Test data for all test cases
+│   ├── corporate-actions.data.ts # Test data for API tests
+│   ├── db/
+│   │   └── corporate-actions.db.ts # Test data for DB tests
 │   ├── interfaces/
-│   │   └── api-interfaces.ts    # TypeScript interfaces for API requests/responses
+│   │   └── api-interfaces.ts    # TypeScript interfaces
 │   └── validation.ts           # Test data validation helpers
 ├── tests/
+│   ├── api/                   # API Tests
+│   │   └── corporate-actions/
+│   │       ├── search.spec.ts      # Search endpoint tests
+│   │       ├── management.spec.ts  # Management endpoint tests
+│   │       └── error-scenarios.spec.ts  # Error scenario tests
+│   ├── db/                    # Database Tests
+│   │   └── corporate-actions/
+│   │       └── db.spec.ts         # Database operations tests
 │   ├── fixtures/
-│   │   └── test-fixtures.ts    # Custom test fixtures
+│   │   ├── test-fixtures.ts    # Common test fixtures
+│   │   └── db-fixtures.ts      # Database test fixtures
 │   ├── helpers/
-│   │   └── api-helpers.ts      # Common API helper functions
-│   └── corporate-actions/
-│       ├── search.spec.ts      # Tests for search endpoints
-│       ├── details.spec.ts     # Tests for details endpoints
-│       ├── history.spec.ts     # Tests for history endpoints
-│       ├── management.spec.ts  # Tests for management endpoints
-│       └── error-scenarios.spec.ts  # Tests for error scenarios
+│   │   ├── api-helpers.ts      # API helper functions
+│   │   └── db-helper.ts        # Database helper functions
+│   └── gui/                    # GUI Tests
+│       ├── pages/              # Page Object Models
+│       │   ├── base.page.ts    # Base page with common functionality
+│       │   ├── corporate-actions-search.page.ts
+│       │   └── corporate-actions-details.page.ts
+│       └── corporate-actions/ # Test specifications
+│           ├── basic-search.spec.ts
+│           └── search.spec.ts
 ├── scripts/
 │   └── analyze-performance.js  # Performance analysis script
 ├── swaggerfile/
@@ -36,6 +50,30 @@ can-api-tests/
 ├── playwright.config.ts       # Playwright configuration
 └── package.json              # Project dependencies
 ```
+
+## Test Organization
+
+### API Tests (`tests/api/`)
+- REST API endpoint testing
+- Request/response validation
+- Error handling
+- Performance testing
+- Integration testing
+
+### Database Tests (`tests/db/`)
+- Direct database operations
+- Data integrity checks
+- Transaction testing
+- Performance testing
+- Schema validation
+
+### GUI Tests (`tests/gui/`)
+- Web interface testing
+- Page Object Model pattern
+- Basic and advanced search
+- Results verification
+- Navigation flow
+- Data consistency
 
 ## Getting Started
 
@@ -182,6 +220,299 @@ strategy:
 - Authorization
 - Input validation
 - Error handling
+
+## Database Testing
+
+### Prerequisites
+1. IBM Informix Client SDK
+   - Download from [IBM Informix Client SDK](https://www.ibm.com/support/pages/node/317083)
+   - Install the SDK appropriate for your operating system
+   - Add the following environment variables:
+     ```bash
+     INFORMIXDIR=C:\Program Files\IBM Informix Client-SDK
+     PATH=%INFORMIXDIR%\bin;%PATH%
+     ```
+
+2. Node.js Dependencies
+   ```bash
+   npm install
+   ```
+
+### Database Configuration
+1. Create a `.env` file in the project root:
+```bash
+# Informix Connection Settings
+DB_SERVER=your_server_name
+DB_HOST=localhost
+DB_PORT=9088
+DB_NAME=corporate_actions
+DB_USER=informix
+DB_PASSWORD=your_password
+```
+
+2. Configure `sqlhosts` file:
+   - Location: `%INFORMIXDIR%\etc\sqlhosts`
+   - Add your server configuration:
+     ```
+     your_server_name    onsoctcp    localhost    9088
+     ```
+
+### Running Database Tests
+```bash
+# Run all DB tests
+npx playwright test tests/db
+
+# Run specific DB test file
+npx playwright test tests/db/corporate-actions/db.spec.ts
+
+# Run specific test case
+npx playwright test -g "T1_DB_GetCorporateAction_ValidId"
+```
+
+### Database Helper Features
+The `DatabaseHelper` class (`tests/helpers/db-helper.ts`) provides:
+
+1. Connection Management
+   ```typescript
+   const db = DatabaseHelper.getInstance();
+   ```
+
+2. Query Execution
+   ```typescript
+   // Query multiple rows
+   const results = await db.query<YourType>(
+     'SELECT * FROM your_table WHERE condition = ?',
+     ['value']
+   );
+
+   // Query single row
+   const result = await db.queryOne<YourType>(
+     'SELECT * FROM your_table WHERE id = ?',
+     [1]
+   );
+   ```
+
+3. Data Modification
+   ```typescript
+   await db.execute(
+     'INSERT INTO your_table (col1, col2) VALUES (?, ?)',
+     ['value1', 'value2']
+   );
+   ```
+
+4. Transaction Management
+   ```typescript
+   try {
+     await db.beginTransaction();
+     // ... perform operations
+     await db.commitTransaction();
+   } catch (error) {
+     await db.rollbackTransaction();
+     throw error;
+   }
+   ```
+
+5. Test Data Management
+   ```typescript
+   // Clean tables
+   await db.cleanup(['table1', 'table2']);
+
+   // Seed test data
+   await db.seedTestData('your_table', [
+     { col1: 'value1', col2: 'value2' },
+     { col1: 'value3', col2: 'value4' }
+   ]);
+   ```
+
+### Best Practices
+
+1. Connection Management
+   - Use singleton pattern via `getInstance()`
+   - Close connections after test completion
+   - Handle connection errors gracefully
+
+2. Transaction Safety
+   - Always use transactions for data modifications
+   - Implement proper error handling and rollback
+   - Clean up test data after tests
+
+3. Query Parameters
+   - Use parameterized queries to prevent SQL injection
+   - Never concatenate values directly into SQL strings
+   - Handle NULL values appropriately
+
+4. Error Handling
+   - Catch and log database errors
+   - Implement proper cleanup in error scenarios
+   - Use meaningful error messages
+
+5. Test Data
+   - Use isolated test data
+   - Clean up before and after tests
+   - Use meaningful test data values
+
+### Troubleshooting
+
+1. Connection Issues
+   - Verify Informix Client SDK installation
+   - Check environment variables
+   - Validate sqlhosts configuration
+   - Confirm server accessibility
+
+2. Permission Issues
+   - Verify database user permissions
+   - Check table access rights
+   - Validate connection credentials
+
+3. Data Type Issues
+   - Use appropriate TypeScript types
+   - Handle date/time conversions properly
+   - Consider BLOB/CLOB data handling
+
+4. Performance Issues
+   - Use connection pooling
+   - Implement proper indexing
+   - Optimize query patterns
+   - Clean up resources properly
+
+### Common Error Solutions
+
+1. "Cannot connect to database"
+   - Check if Informix server is running
+   - Verify connection string parameters
+   - Confirm network connectivity
+   - Check firewall settings
+
+2. "Invalid credential"
+   - Verify username and password
+   - Check user permissions
+   - Confirm database exists
+
+3. "Transaction errors"
+   - Check transaction isolation level
+   - Verify lock timeout settings
+   - Handle deadlock scenarios
+
+## GUI Tests
+
+The project includes automated GUI tests using Playwright. These tests verify the functionality of the Corporate Actions web interface.
+
+### Test Structure
+
+```
+tests/gui/
+├── pages/                    # Page Object Models
+│   ├── base.page.ts         # Base page with common functionality
+│   ├── corporate-actions-search.page.ts
+│   └── corporate-actions-details.page.ts
+└── corporate-actions/       # Test specifications
+    ├── basic-search.spec.ts
+    └── search.spec.ts
+```
+
+### Running GUI Tests
+
+```bash
+# Run all GUI tests
+npx playwright test tests/gui --project=gui-tests
+
+# Run specific test file
+npx playwright test tests/gui/corporate-actions/basic-search.spec.ts --project=gui-tests
+
+# Run tests with headed browser (visual mode)
+npx playwright test tests/gui --project=gui-tests --headed
+
+# Run tests and show report
+npx playwright show-report
+```
+
+### Page Objects
+
+The tests use the Page Object Model pattern to improve maintainability and reusability:
+
+- **BasePage**: Common functionality for all pages
+  - Navigation methods
+  - Element interaction helpers
+  - Waiting utilities
+
+- **CorporateActionsSearchPage**: Search functionality
+  - Basic and advanced search
+  - Filtering and pagination
+  - Results handling
+  - Export functionality
+
+- **CorporateActionsDetailsPage**: Details view
+  - General information display
+  - Position details
+  - Message history
+  - Status management
+
+### Test Categories
+
+1. **Basic Search Tests**
+   - Simple search queries
+   - Results verification
+   - Navigation flow
+   - Data consistency
+
+2. **Advanced Search Tests**
+   - Date range filtering
+   - Status filtering
+   - CAEV type filtering
+   - Pagination
+   - Export functionality
+
+### Best Practices
+
+1. **Test Organization**
+   - One test file per feature area
+   - Clear test descriptions
+   - Logical test grouping
+
+2. **Page Objects**
+   - Encapsulated selectors
+   - Reusable methods
+   - Clear documentation
+   - Type-safe interfaces
+
+3. **Assertions**
+   - Meaningful error messages
+   - Complete verification
+   - State validation
+
+4. **Performance**
+   - Efficient selectors
+   - Smart waiting strategies
+   - Resource cleanup
+
+### Troubleshooting
+
+Common issues and solutions:
+
+1. **Test Timeouts**
+   - Increase timeout in playwright.config.ts
+   - Check network conditions
+   - Verify element selectors
+
+2. **Selector Issues**
+   - Use Playwright Inspector to debug
+   - Verify DOM structure
+   - Update page objects if UI changes
+
+3. **State Management**
+   - Clear application state before tests
+   - Handle loading states properly
+   - Manage test data appropriately
+
+### Maintenance
+
+To keep tests reliable:
+
+1. Regularly update page objects when UI changes
+2. Review and update selectors
+3. Maintain test data consistency
+4. Monitor test execution times
+5. Update documentation with changes
 
 ## Performance Analysis
 
