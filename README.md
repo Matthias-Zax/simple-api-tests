@@ -37,6 +37,36 @@ can-api-tests/
 └── package.json              # Project dependencies
 ```
 
+## Getting Started
+
+### Prerequisites
+- Node.js (v16 or higher)
+- npm (v7 or higher)
+- Git
+
+### Installation
+1. Clone the repository:
+```bash
+git clone https://github.com/your-org/can-api-tests.git
+cd can-api-tests
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Install Playwright browsers:
+```bash
+npx playwright install
+```
+
+4. Configure environment variables:
+```bash
+cp .env.example .env
+```
+Edit the `.env` file with your API endpoints and credentials.
+
 ## Test Case Naming Convention
 
 Test cases follow a structured naming pattern:
@@ -254,37 +284,6 @@ The script is automatically run as part of the performance workflow:
    - Monitor resource usage
    - Track performance regressions
 
-## Environment Setup
-
-### Local Development
-```bash
-# Install dependencies
-npm install
-
-# Install Playwright browsers
-npx playwright install
-
-# Set up environment variables
-export TEST_ENV=development
-export API_USERNAME=your_username
-export API_PASSWORD=your_password
-
-# Run tests
-npm test
-```
-
-### CI Environment
-```bash
-# Install dependencies
-npm ci
-
-# Install Playwright with dependencies
-npx playwright install --with-deps
-
-# Run specific test group
-npm test tests/corporate-actions/search.spec.ts
-```
-
 ## Test Execution
 
 ### Running Tests Locally
@@ -293,7 +292,7 @@ npm test tests/corporate-actions/search.spec.ts
 # Run all tests
 npm test
 
-# Run specific test file
+# Run specific test files
 npm test tests/corporate-actions/search.spec.ts
 
 # Run tests with specific tag
@@ -304,6 +303,15 @@ npm test -- --ui
 
 # Run tests with specific configuration
 TEST_ENV=development npm test
+```
+
+### Debug Tests
+```bash
+# Run tests in debug mode
+npm run test:debug
+
+# Run specific test in debug mode with UI
+npm run test:debug tests/corporate-actions/search.spec.ts
 ```
 
 ### Running in CI
@@ -322,10 +330,14 @@ gh workflow run performance.yml
 ## Monitoring and Reporting
 
 ### Test Reports
-- Available in GitHub Actions artifacts
-- Generated after each test run
-- Includes failure details and screenshots
-- Performance metrics and trends
+- HTML reports are generated automatically after test runs
+- Reports include:
+  - Test results summary
+  - Test execution time
+  - Screenshots of failures
+  - Trace viewer for debugging
+  - Network requests log
+  - Console logs
 
 ### Performance Monitoring
 - Response time tracking
@@ -339,20 +351,50 @@ gh workflow run performance.yml
 - Failure notifications
 - Error pattern analysis
 
+## Troubleshooting
+
+#### Common Issues
+1. **API Connection Issues**
+   - Check if the API is accessible
+   - Verify environment variables
+   - Check network/proxy settings
+
+2. **Authentication Failures**
+   - Verify API credentials in `.env`
+   - Check token expiration
+   - Ensure correct environment is set
+
+3. **Test Failures**
+   - Check test data validity
+   - Verify API response structure
+   - Review test logs for errors
+
+#### Debug Logs
+Enable debug logs for more detailed output:
+```bash
+# Enable Playwright debug logs
+DEBUG=pw:api npm test
+
+# Enable all debug logs
+DEBUG=* npm test
+```
+
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Add or update tests following conventions
-4. Update documentation
-5. Submit a pull request
+1. Create a feature branch:
+```bash
+git checkout -b feature/your-feature-name
+```
 
-### Pull Request Guidelines
-- Include test plan
-- Add appropriate tags
-- Update relevant documentation
-- Follow code style guidelines
-- Include performance considerations
+2. Make your changes and run tests:
+```bash
+npm test
+```
+
+3. Create a pull request with:
+   - Clear description of changes
+   - Test results
+   - Any relevant documentation updates
 
 ## Recent Updates
 
